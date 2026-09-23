@@ -1,0 +1,196 @@
+.app-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 28px;
+  border-right: 1px solid var(--border);
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--bg);
+  overflow-y: auto;
+
+  label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  textarea {
+    min-height: 96px;
+    resize: vertical;
+  }
+
+  select,
+  textarea,
+  input[type='number'] {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font: inherit;
+  }
+
+  /* <1024px에서는 기본적으로 숨겨지고, 열리면 챗 화면을 덮지 않고 레이아웃을 밀어내며 자리를 차지한다 */
+  @media (max-width: 1023px) {
+    display: none;
+    width: min(280px, 85vw);
+  }
+}
+
+.settings-panel--open {
+  @media (max-width: 1023px) {
+    display: flex;
+  }
+}
+
+.settings-panel__close {
+  align-self: flex-end;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  display: none;
+
+  @media (max-width: 1023px) {
+    display: inline-flex;
+  }
+}
+
+.settings-panel__error {
+  color: #d33;
+  font-size: 13px;
+  margin: 0;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 28px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+
+  @media (max-width: 767px) {
+    max-width: 90%;
+  }
+}
+
+.message-bubble--user {
+  align-self: flex-end;
+  background: #d6e9ff;
+  color: #0b3d66;
+}
+
+.message-bubble--assistant {
+  align-self: flex-start;
+  background: #eee;
+  color: #333;
+}
+
+.message-bubble--error {
+  align-self: flex-start;
+  background: #fde2e2;
+  color: #8a1f1f;
+}
+
+.message-bubble__meta {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.message-bubble--pending {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-window__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+
+  h1 {
+    font-size: 20px;
+  }
+
+  p {
+    font-size: 13px;
+    color: var(--text);
+  }
+}
+
+.chat-window__sidebar-toggle {
+  display: none;
+
+  @media (max-width: 1023px) {
+    display: inline-flex;
+  }
+}
+
+.chat-window__error-banner {
+  margin: 0;
+  padding: 10px 28px;
+  background: #fde2e2;
+  color: #8a1f1f;
+  font-size: 14px;
+}
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  padding: 16px 28px;
+  border-top: 1px solid var(--border);
+
+  textarea {
+    flex: 1;
+    resize: none;
+    min-height: 44px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font: inherit;
+  }
+
+  button {
+    padding: 0 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  @media (max-width: 767px) {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg, #fff);
+  }
+}
