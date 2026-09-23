@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:9000'
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:9000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
 export async function fetchModels(options = {}) {
   const response = await fetch(`${API_BASE_URL}/models`, { signal: options.signal })
