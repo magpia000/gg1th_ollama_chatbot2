@@ -64,13 +64,14 @@ def list_models():
           status_code = 500,
           detail = f"모델 목록 조회 중 오류가 발생했습니다.: {exc}"
        )
-
+# nohup fastapi run --host 127.0.0.1 --port 9000 > app.log 2>&1 &
 # uv run main.py
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        # host="127.0.0.1",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
+        host="127.0.0.1",
+        # host="0.0.0.0",
+        port=9000,
+        # reload=True,
+        reload=False,
     )

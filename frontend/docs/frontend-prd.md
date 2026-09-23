@@ -46,6 +46,7 @@
 - FR-6: Temperature(0.0–2.0)와 Top P(0.0–1.0)는 `SettingsPanel` 내부의 로컬 슬라이더 마크업(별도 컴포넌트로 분리하지 않음)으로 렌더링하고, 현재 값을 라벨에 실시간 표시한다(목업의 "Temperature: 0.4", "Top P: 0.55" 형식).
 - FR-7: Num Predict 입력은 숫자 입력(1–2048)이며 유효 범위를 벗어나면 백엔드 스키마 제약(`backend/schemas.py`)에 맞춰 클램핑한다.
 - FR-8: 사이드바의 모든 설정값 기본값은 `backend/schemas.py`의 `ChatRequest` 기본값과 동일해야 한다 (model: `"exaone3.5:7.8b"`, system_prompt: "너는 초보자를 돕는 친절한 AI 강사다.", temperature: 0.6, top_p: 0.7, num_predict: 256). 목업 스크린샷 값(0.4/0.55/256)은 데모 상태의 스냅샷일 뿐 기본값 사양이 아니다.
+- FR-19: 시스템 프롬프트 입력 위에 "시스템 프롬프트 모드" select를 추가한다. `src/api/promptModes.js`의 각 모드(`label`, `prompt`)를 옵션으로 나열하고 기본 선택값은 "직접 입력"(빈 값)이다. 모드를 선택하면 해당 `prompt` 전문이 시스템 프롬프트 textarea에 즉시 표시되며, 이후 textarea를 직접 수정해도 된다(FR-5와 동일하게 계속 편집 가능). 선택 상태는 별도 state 없이 현재 `systemPrompt` 값이 어느 프리셋과 일치하는지로 렌더링 중 파생 계산한다. 전송 시에는 FR-5~8과 동일하게 현재 textarea 값(프리셋이든 직접 입력이든)이 `POST /chat`의 `system_prompt`로 전달된다(별도 구현 불필요, 기존 FR-5~8 경로 재사용). (사용자 요청으로 추가됨)
 
 ### 2.3 대화 메시지 영역 (`MessageList` / `MessageBubble`)
 
@@ -130,7 +131,9 @@ frontend/
 │   ├── main.jsx
 │   ├── api/
 │   │ ├── chatApi.js        # API 호출 로직
-│   │ └── chatApi.test.js
+│   │ ├── chatApi.test.js
+│   │ ├── promptModes.js    # 시스템 프롬프트 모드 프리셋 데이터
+│   │ └── promptModes.test.js
 │   ├── components/
 │   │ ├── ChatWindow.jsx        # 메인 채팅 윈도우
 │   │ ├── ChatWindow.test.jsx
@@ -157,7 +160,7 @@ frontend/
 
 이 구조는 고정이며, 이후 단계(코드 구현)에서 임의로 폴더를 추가/변경하지 않는다. 변경이 필요하면 본 PRD를 먼저 갱신한다.
 
-**갱신 이력**: 3단계(TDD) 진행 중 테스트 프레임워크(Vitest, @testing-library/react, @testing-library/jest-dom)가 필요해 사용자 승인 하에 추가했다. `*.test.jsx`/`chatApi.test.js`, `src/test/setup.js`가 이에 해당하며, `docs/tasks.md`·`docs/tdd.md`는 2·3단계 작업 프롬프트 산출물이다. 원래 §3.3에는 없었으나 위 트리에 반영해 "1:1 일치"를 최신 상태로 유지한다.
+**갱신 이력**: 3단계(TDD) 진행 중 테스트 프레임워크(Vitest, @testing-library/react, @testing-library/jest-dom)가 필요해 사용자 승인 하에 추가했다. `*.test.jsx`/`chatApi.test.js`, `src/test/setup.js`가 이에 해당하며, `docs/tasks.md`·`docs/tdd.md`는 2·3단계 작업 프롬프트 산출물이다. 원래 §3.3에는 없었으나 위 트리에 반영해 "1:1 일치"를 최신 상태로 유지한다. 이후 시스템 프롬프트 모드 선택 기능(§2.2 FR-19) 추가 시 사용자가 직접 `src/api/promptModes.js`를 만들어 전달했고, 이를 §3.3에 반영했다.
 
 ---
 
@@ -196,7 +199,7 @@ App.jsx
 
 ### 4.3 Props 계약 (요약)
 
-- `SettingsPanel({ settings, onSettingsChange, models, modelsLoading, modelsError, isOpen, onClose })` — Temperature/Top P 슬라이더는 별도 컴포넌트 없이 `SettingsPanel` 내부에 로컬 마크업으로 반복 작성한다. `<1024px`에서 `onClose`는 배경 오버레이가 아닌 패널 내부의 닫기(✕) 버튼 클릭으로 호출된다(§2.5).
+- `SettingsPanel({ settings, onSettingsChange, models, modelsLoading, modelsError, isOpen, onClose })` — Temperature/Top P 슬라이더는 별도 컴포넌트 없이 `SettingsPanel` 내부에 로컬 마크업으로 반복 작성한다. `<1024px`에서 `onClose`는 배경 오버레이가 아닌 패널 내부의 닫기(✕) 버튼 클릭으로 호출된다(§2.5). 시스템 프롬프트 모드 select는 `src/api/promptModes.js`를 import해 내부에서 직접 렌더링하며, 선택된 모드는 `settings.systemPrompt`와 프리셋 텍스트를 비교해 파생 계산한다(FR-19).
 - `ChatWindow({ messages, isSending, chatError, onSend, onReset, onToggleSidebar })` — 타이틀/서브타이틀/"대화 초기화" 버튼/사이드바 토글 버튼(헤더 영역)을 내부에서 직접 렌더링하고, `MessageList`와 `ChatInput`을 자식으로 구성한다.
 - `MessageList({ messages, isSending })`
 - `MessageBubble({ role, content, model?, elapsedTime? })` — `model`/`elapsedTime`이 모두 있으면 말풍선 하단에 메타 정보(예: "exaone3.5:7.8b · 2.21초")를 표시한다(FR-18).

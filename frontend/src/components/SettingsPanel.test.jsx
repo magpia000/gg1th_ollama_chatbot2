@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { promptModes } from '../api/promptModes'
 import SettingsPanel from './SettingsPanel'
 
 const baseProps = {
@@ -87,6 +88,44 @@ describe('SettingsPanel', () => {
         ...baseProps.settings,
         systemPrompt: '너는 엄격한 검토자다.',
       })
+    })
+  })
+
+  describe('시스템 프롬프트 모드 선택 (promptModes.js)', () => {
+    it('promptModes의 각 모드를 옵션으로 렌더링하고, 기본값은 "직접 입력"이다', () => {
+      render(<SettingsPanel {...baseProps} />)
+
+      const select = screen.getByRole('combobox', { name: '시스템 프롬프트 모드' })
+      expect(select).toHaveValue('')
+      Object.values(promptModes).forEach((mode) => {
+        expect(select).toHaveTextContent(mode.label)
+      })
+    })
+
+    it('모드를 선택하면 onSettingsChange가 해당 모드의 prompt로 systemPrompt를 갱신한다', () => {
+      const onSettingsChange = vi.fn()
+      render(<SettingsPanel {...baseProps} onSettingsChange={onSettingsChange} />)
+
+      fireEvent.change(screen.getByRole('combobox', { name: '시스템 프롬프트 모드' }), {
+        target: { value: 'code' },
+      })
+
+      expect(onSettingsChange).toHaveBeenCalledWith({
+        ...baseProps.settings,
+        systemPrompt: promptModes.code.prompt,
+      })
+    })
+
+    it('선택한 모드의 prompt가 systemPrompt textarea에 표시된다', () => {
+      const { rerender } = render(<SettingsPanel {...baseProps} />)
+
+      const updatedSettings = { ...baseProps.settings, systemPrompt: promptModes.code.prompt }
+      rerender(<SettingsPanel {...baseProps} settings={updatedSettings} />)
+
+      expect(screen.getByRole('textbox', { name: '시스템 프롬프트' })).toHaveValue(
+        promptModes.code.prompt,
+      )
+      expect(screen.getByRole('combobox', { name: '시스템 프롬프트 모드' })).toHaveValue('code')
     })
   })
 

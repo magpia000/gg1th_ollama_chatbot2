@@ -1,3 +1,5 @@
+import { promptModes } from '../api/promptModes'
+
 function SettingsPanel({
   settings,
   onSettingsChange,
@@ -9,6 +11,9 @@ function SettingsPanel({
 }) {
   const isModelSelectDisabled = modelsLoading || Boolean(modelsError)
   const panelClassName = isOpen ? 'settings-panel settings-panel--open' : 'settings-panel'
+  const selectedPromptModeKey =
+    Object.entries(promptModes).find(([, mode]) => mode.prompt === settings.systemPrompt)?.[0] ??
+    ''
 
   return (
     <aside className={panelClassName}>
@@ -36,6 +41,27 @@ function SettingsPanel({
         ))}
       </select>
       {modelsError && <p className="settings-panel__error">{modelsError}</p>}
+
+      <label htmlFor="settings-panel-prompt-mode">시스템 프롬프트 모드</label>
+      <select
+        id="settings-panel-prompt-mode"
+        aria-label="시스템 프롬프트 모드"
+        value={selectedPromptModeKey}
+        onChange={(event) => {
+          const key = event.target.value
+          if (key === '') {
+            return
+          }
+          onSettingsChange({ ...settings, systemPrompt: promptModes[key].prompt })
+        }}
+      >
+        <option value="">직접 입력</option>
+        {Object.entries(promptModes).map(([key, mode]) => (
+          <option key={key} value={key}>
+            {mode.label}
+          </option>
+        ))}
+      </select>
 
       <label htmlFor="settings-panel-system-prompt">시스템 프롬프트</label>
       <textarea

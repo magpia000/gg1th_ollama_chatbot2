@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App, { DEFAULT_SETTINGS } from './App'
 import * as chatApi from './api/chatApi'
+import { promptModes } from './api/promptModes'
 
 vi.mock('./api/chatApi', () => ({
   fetchModels: vi.fn(),
@@ -154,6 +155,38 @@ describe('App', () => {
 
       expect(chatApi.sendChatMessage).toHaveBeenCalledWith(
         expect.objectContaining({ temperature: 1.2 }),
+      )
+    })
+
+    it('시스템 프롬프트 모드를 선택하면 해당 prompt가 텍스트박스에 표시되고 전송 시 서버로 전달된다', async () => {
+      chatApi.sendChatMessage.mockResolvedValue({
+        model: 'exaone3.5:7.8b',
+        message: '반갑습니다',
+        elapsedTime: 1.2,
+      })
+
+      await act(async () => {
+        render(<App />)
+      })
+
+      fireEvent.change(screen.getByRole('combobox', { name: '시스템 프롬프트 모드' }), {
+        target: { value: 'code' },
+      })
+
+      const expectedPrompt = promptModes.code.prompt
+      expect(screen.getByRole('textbox', { name: '시스템 프롬프트' })).toHaveValue(
+        expectedPrompt,
+      )
+
+      fireEvent.change(screen.getByPlaceholderText('메시지를 입력하세요...'), {
+        target: { value: '안녕' },
+      })
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: '전송' }))
+      })
+
+      expect(chatApi.sendChatMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ systemPrompt: expectedPrompt }),
       )
     })
 

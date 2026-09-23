@@ -75,3 +75,14 @@
 - [x] 5.5 §3.3 폴더 구조와 실제 저장소 구조 1:1 일치 여부 최종 확인 — 파일 추가/누락 없음. (frontend-prd.md §5 항목 11)
 - [x] 5.6 저장소 내 `.ts`/`.tsx` 파일 및 클래스 컴포넌트 없음 확인. (frontend-prd.md §5 항목 8)
 - [x] 5.7 시각 검수 후 폴리시 — `SettingsPanel`/`ChatWindow` 헤더·`MessageList`·`ChatInput`의 좌우 여백을 20px → 28px로 확대(사용자 피드백).
+
+---
+
+## 6. [헤더+사이드바 영역] 시스템 프롬프트 모드 선택 기능 (사용자 요청으로 추가, §2.2 FR-19)
+
+- [x] 6.1 `src/api/promptModes.js`(사용자가 직접 작성해 전달)의 각 모드를 옵션으로 나열하는 select를 `SettingsPanel`에 추가, 기본 선택값은 "직접 입력"(빈 값). 선택된 모드는 `settings.systemPrompt`가 어느 프리셋과 일치하는지로 파생 계산(별도 state 없음).
+- [x] 6.2 모드를 선택하면 `onSettingsChange`로 `systemPrompt`를 해당 프리셋 텍스트로 갱신 → 기존 FR-5 textarea가 그대로 반영해 보여줌.
+- [x] 6.3 전송 시 서버 전달 확인 — 별도 구현 없이 기존 `handleSend`가 `settings.systemPrompt`를 그대로 `sendChatMessage()`에 전달하는 경로(§4.2)를 재사용함을 App 통합 테스트로 검증.
+- [x] 6.4 `promptModes.js` 데이터 무결성(각 모드 `label`/`prompt` 비어있지 않음) 테스트 추가.
+
+**§3.3 갱신**: `src/api/promptModes.js`, `promptModes.test.js`를 폴더 구조에 반영(고정 트리는 §3.3 참고).
